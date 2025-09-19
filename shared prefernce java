@@ -1,0 +1,61 @@
+package com.example.shared_preferences;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.shared_preferences.R;
+
+public class MainActivity extends AppCompatActivity {
+
+    EditText etName, etAge, etPhone, etPassword;
+    Button btnSubmit;
+
+    SharedPreferences sharedPreferences;
+
+    public static final String PREF_NAME = "user_details";
+    public static final String KEY_NAME = "name";
+    public static final String KEY_AGE = "age";
+    public static final String KEY_PHONE = "phone";
+    public static final String KEY_PASSWORD = "password"; // For demo only
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        // Initialize views
+        etName = findViewById(R.id.editTextText);
+        etAge = findViewById(R.id.editTextNumber);
+        etPhone = findViewById(R.id.editTextNumber2);
+        etPassword = findViewById(R.id.editTextTextPassword);
+        btnSubmit = findViewById(R.id.button);
+
+        sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+
+        btnSubmit.setOnClickListener(view -> {
+            String name = etName.getText().toString().trim();
+            String age = etAge.getText().toString().trim();
+            String phone = etPhone.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (name.isEmpty() || age.isEmpty() || phone.isEmpty() || password.isEmpty()) {
+                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            } else {
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putString(KEY_NAME, name);
+                editor.putString(KEY_AGE, age);
+                editor.putString(KEY_PHONE, phone);
+                editor.putString(KEY_PASSWORD, password); // Not secure in real apps
+                editor.apply();
+
+                Toast.makeText(this, "Details Saved Successfully!", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+}
