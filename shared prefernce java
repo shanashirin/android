@@ -1,61 +1,82 @@
 package com.example.shared_preferences;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.example.shared_preferences.R;
 
 public class MainActivity extends AppCompatActivity {
 
-    EditText etName, etAge, etPhone, etPassword;
-    Button btnSubmit;
-
-    SharedPreferences sharedPreferences;
-
-    public static final String PREF_NAME = "user_details";
-    public static final String KEY_NAME = "name";
-    public static final String KEY_AGE = "age";
-    public static final String KEY_PHONE = "phone";
-    public static final String KEY_PASSWORD = "password"; // For demo only
+    EditText editTextName, editTextAge, editTextPhone, editTextPassword;
+    Button buttonRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Initialize views
-        etName = findViewById(R.id.editTextText);
-        etAge = findViewById(R.id.editTextNumber);
-        etPhone = findViewById(R.id.editTextNumber2);
-        etPassword = findViewById(R.id.editTextTextPassword);
-        btnSubmit = findViewById(R.id.button);
+        // Bind UI elements
+        editTextName = findViewById(R.id.editTextText);
+        editTextAge = findViewById(R.id.editTextNumber);
+        editTextPhone = findViewById(R.id.editTextNumber2);
+        editTextPassword = findViewById(R.id.editTextTextPassword);
+        buttonRegister = findViewById(R.id.button);
 
-        sharedPreferences = getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        // Load saved data and populate fields
+        loadUserData();
 
-        btnSubmit.setOnClickListener(view -> {
-            String name = etName.getText().toString().trim();
-            String age = etAge.getText().toString().trim();
-            String phone = etPhone.getText().toString().trim();
-            String password = etPassword.getText().toString().trim();
-
-            if (name.isEmpty() || age.isEmpty() || phone.isEmpty() || password.isEmpty()) {
-                Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
-            } else {
-                SharedPreferences.Editor editor = sharedPreferences.edit();
-                editor.putString(KEY_NAME, name);
-                editor.putString(KEY_AGE, age);
-                editor.putString(KEY_PHONE, phone);
-                editor.putString(KEY_PASSWORD, password); // Not secure in real apps
-                editor.apply();
-
-                Toast.makeText(this, "Details Saved Successfully!", Toast.LENGTH_SHORT).show();
-            }
+        // Button click listener to save data
+        buttonRegister.setOnClickListener(v -> {
+            saveUserData();
         });
+    }
+
+    private void loadUserData() {
+        SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+
+        String name = sharedPreferences.getString("name", "");
+        String age = sharedPreferences.getString("age", "");
+        String phone = sharedPreferences.getString("phone", "");
+        String password = sharedPreferences.getString("password", "");
+
+        editTextName.setText(name);
+        editTextAge.setText(age);
+        editTextPhone.setText(phone);
+        editTextPassword.setText(password);
+
+        Log.d("SharedPref", "Loaded user data: " + name + ", " + age + ", " + phone + ", " + password);
+    }
+
+    private void saveUserData() {
+        String name = editTextName.getText().toString().trim();
+        String age = editTextAge.getText().toString().trim();
+        String phone = editTextPhone.getText().toString().trim();
+        String password = editTextPassword.getText().toString().trim();
+
+        if(name.isEmpty() || age.isEmpty() || phone.isEmpty() || password.isEmpty()) {
+            Toast.makeText(MainActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserData", MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString("name", name);
+        editor.putString("age", age);
+        editor.putString("phone", phone);
+        editor.putString("password", password);
+
+        boolean success = editor.commit();  // synchronous save
+
+        if(success) {
+            Toast.makeText(MainActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+            Log.d("SharedPref", "User data saved: " + name + ", " + age + ", " + phone + ", " + password);
+        } else {
+            Toast.makeText(MainActivity.this, "Failed to save data", Toast.LENGTH_SHORT).show();
+            Log.e("SharedPref", "Failed to save user data");
+        }
     }
 }
